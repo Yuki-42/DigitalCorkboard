@@ -68,7 +68,6 @@ The `Comments` table contains all the information about every single comment in 
 | `Content`   | `Text`     | No       |                 | The content of the comment.                       |
 | `AddedOn`   | `DateTime` | No       |                 | The date the comment was made.                    |
 | `EditedOn`  | `DateTime` | Yes      |                 | The date the comment was last edited.             |
-| `DeletedOn` | `DateTime` | Yes      |                 | The date the comment was deleted.                 |
 
 #### PostTags
 
@@ -145,7 +144,6 @@ CREATE TABLE IF NOT EXISTS Comments (
     Content TEXT NOT NULL,
     AddedOn DATETIME NOT NULL,
     EditedOn DATETIME,
-    DeletedOn DATETIME,
     FOREIGN KEY (PostId) REFERENCES Posts(Id) ON DELETE CASCADE,
     FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
 );
@@ -185,6 +183,32 @@ the database.
 The `_checkTablesExist()` method checks if the tables exist in the database. It takes no arguments. It returns nothing.
 It checks that the database contains all the correct tables, and if it encounters a missing table, it creates it.
 
+#### Properties
+
+This section details all properties. Properties are used instead of `getAll()` methods to make it easier for the
+developers to quickly and concisely access needed data from the database in a readable fashion. There should be
+absolutely no use of methods that get all data from the database in the rest of the code. 
+
+##### `users`
+
+The `users` property gets all users from the database. It returns a list of `User` objects.
+
+##### `posts`
+
+The `posts` property gets all posts from the database. It returns a list of `Post` objects.
+
+##### `tags`
+
+The `tags` property gets all tags from the database. It returns a list of `Tag` objects.
+
+##### `comments`
+
+The `comments` property gets all comments from the database. It returns a list of `Comment` objects.
+
+##### `postTags`
+
+The `postTags` property gets all post tags from the database. It returns a list of tuples, each of which contains the
+
 #### Add methods
 
 This section details all methods that add whole rows to the database.
@@ -206,7 +230,7 @@ The `addPost()` method adds a post to the database. It takes the following argum
 - `title`: The title of the post.
 - `content`: The content of the post.
 - `expiresOn`: The date the post expires.
-- `tags`: The tags of the post. This can either be a list of integers, or a list of (Tag)[#### Tag] objects.
+- `tags`: The tags of the post. This is a list of integers representing the IDs of the tags.
 
 The method returns the ID of the post that was added.
 
@@ -245,9 +269,355 @@ The `addPostTag()` method adds a tag to a post. It takes the following arguments
 
 The method returns nothing.
 
+#### Remove methods
+
+This section details all methods that remove whole rows from the database.
+
+##### `removeUser`
+
+The `removeUser()` method removes a user from the database. When removing a user, all posts and comments made by that
+user are also removed. It takes the following arguments:
+
+- `userId`: The ID of the user.
+
+The method returns nothing.
+
+##### `removePost`
+
+The `removePost()` method removes a post from the database. When removing a post, all comments on that post are also
+removed and all tags on that post are also removed. It takes the following arguments:
+
+- `postId`: The ID of the post.
+
+The method returns nothing.
+
+##### `removeTag`
+
+The `removeTag()` method removes a tag from the database. When removing a tag, all posts with that tag are also removed.
+It takes the following arguments:
+
+- `tagId`: The ID of the tag.
+
+The method returns nothing.
+
+##### `removeComment`
+
+The `removeComment()` method removes a comment from the database. It takes the following arguments:
+
+- `commentId`: The ID of the comment.
+
+The method returns nothing.
+
+#### Misnomer Remove Methods
+
+This section details all methods that remove data from the database, without removing a whole row. They are called
+misnomer remove methods because they do not actually remove a row from the database, but rather remove data from an
+existing row. It would be unwise to rename them, however, as their naming makes sense in the context of the rest of the
+code.
+
+##### `removePostTag`
+
+The `removePostTag()` method removes a tag from a post. It takes the following arguments:
+
+- `postId`: The ID of the post.
+- `tagId`: The ID of the tag.
+
+The method returns nothing.
+
 #### Modify methods
 
+This section details all methods that modify specific fields in the database.
 
+##### `modifyUser`
+
+The `modifyUser()` method modifies a user in the database. The only argument required is the ID of the user. The method 
+takes the following keyword arguments:
+
+- `firstName`: The first name of the user.
+- `lastName`: The last name of the user.
+- `email`: The email of the user.
+- `password`: The password of the user.
+- `admin`: Whether the user is an admin.
+- `bio`: The bio of the user.
+
+The method returns nothing.
+
+##### `modifyPost`
+
+The `modifyPost()` method modifies a post in the database. The only argument required is the ID of the post. The method
+takes the following keyword arguments:
+
+- `creatorId`: The ID of the creator of the post.
+- `title`: The title of the post.
+- `content`: The content of the post.
+- `expiresOn`: The date the post expires.
+- `tags`: The tags of the post. This is a list of integers representing the IDs of the tags.
+
+The method returns nothing.
+
+##### `modifyTag`
+
+The `modifyTag()` method modifies a tag in the database. The only argument required is the ID of the tag. The method
+takes the following keyword arguments:
+
+- `name`: The name of the tag.
+- `description`: The description of the tag.
+- `colour`: The colour of the tag.
+
+The method returns nothing.
+
+##### `modifyComment`
+
+The `modifyComment()` method modifies a comment in the database. The only argument required is the ID of the comment.
+The method takes the following keyword arguments:
+
+- `postId`: The ID of the post the comment is on.
+- `userId`: The ID of the user who made the comment.
+- `content`: The content of the comment.
+- `editedOn`: The date the comment was last edited.
+
+The method returns nothing.
+
+#### Check methods
+
+This section details all methods that check if a row exists in the database.
+
+##### `checkUserExists`
+
+The `checkUserExists()` method checks if a user exists in the database. It takes the following arguments:
+
+- `userId`: The ID of the user.
+
+The method returns a boolean value.
+
+##### `checkPostExists`
+
+The `checkPostExists()` method checks if a post exists in the database. It takes the following arguments:
+
+- `postId`: The ID of the post.
+
+The method returns a boolean value.
+
+##### `checkTagExists`
+
+The `checkTagExists()` method checks if a tag exists in the database. It takes the following arguments:
+
+- `tagId`: The ID of the tag.
+
+The method returns a boolean value.
+
+##### `checkCommentExists`
+
+The `checkCommentExists()` method checks if a comment exists in the database. It takes the following arguments:
+
+- `commentId`: The ID of the comment.
+
+The method returns a boolean value.
+
+#### Get methods
+
+This section details all methods that get data from the database.
+
+##### `getUser`
+
+The `getUser()` method gets a user from the database. It takes the following arguments:
+
+- `userId`: The ID of the user.
+
+The method returns a `User` object.
+
+##### `getUserName`
+
+The `getUserName()` method gets the name of a user from the database. It takes the following arguments:
+
+- `userId`: The ID of the user.
+
+The method returns a tuple containing the first and last name of the user.
+
+##### `getUserEmail`
+
+The `getUserEmail()` method gets the email of a user from the database. It takes the following arguments:
+
+- `userId`: The ID of the user.
+
+The method returns the email of the user.
+
+##### `getUserPassword`
+
+The `getUserPassword()` method gets the password of a user from the database. It takes the following arguments:
+
+- `userId`: The ID of the user.
+
+The method returns the password of the user.
+
+##### `getUserAdmin`
+
+The `getUserAdmin()` method gets whether a user is an admin from the database. It takes the following arguments:
+
+- `userId`: The ID of the user.
+
+The method returns a boolean value.
+
+##### `getUserBio`
+
+The `getUserBio()` method gets the bio of a user from the database. It takes the following arguments:
+
+- `userId`: The ID of the user.
+
+The method returns the bio of the user.
+
+##### `getUserAddedOn`
+
+The `getUserAddedOn()` method gets the date a user joined from the database. It takes the following arguments:
+
+- `userId`: The ID of the user.
+
+The method returns the date the user joined.
+
+
+##### `getPost`
+
+The `getPost()` method gets a post from the database. It takes the following arguments:
+
+- `postId`: The ID of the post.
+
+The method returns a `Post` object.
+
+##### `getPostCreatorId`
+
+The `getPostCreatorId()` method gets the ID of the creator of a post from the database. It takes the following arguments:
+
+- `postId`: The ID of the post.
+
+The method returns the ID of the creator of the post.
+
+##### `getPostTitle`
+
+The `getPostTitle()` method gets the title of a post from the database. It takes the following arguments:
+
+- `postId`: The ID of the post.
+
+The method returns the title of the post.
+
+##### `getPostContent`
+
+The `getPostContent()` method gets the content of a post from the database. It takes the following arguments:
+
+- `postId`: The ID of the post.
+
+The method returns the content of the post.
+
+##### `getPostAddedOn`
+
+The `getPostAddedOn()` method gets the date a post was made from the database. It takes the following arguments:
+
+- `postId`: The ID of the post.
+
+The method returns the date the post was made.
+
+##### `getPostExpiresOn`
+
+The `getPostExpiresOn()` method gets the date a post expires from the database. It takes the following arguments:
+
+- `postId`: The ID of the post.
+
+The method returns the date the post expires.
+
+##### `getTag`
+
+The `getTag()` method gets a tag from the database. It takes the following arguments:
+
+- `tagId`: The ID of the tag.
+
+The method returns a `Tag` object.
+
+##### `getTagName`
+
+The `getTagName()` method gets the name of a tag from the database. It takes the following arguments:
+
+- `tagId`: The ID of the tag.
+
+The method returns the name of the tag.
+
+##### `getTagDescription`
+
+The `getTagDescription()` method gets the description of a tag from the database. It takes the following arguments:
+
+- `tagId`: The ID of the tag.
+
+The method returns the description of the tag.
+
+##### `getTagColour`
+
+The `getTagColour()` method gets the colour of a tag from the database. It takes the following arguments:
+
+- `tagId`: The ID of the tag.
+
+The method returns the colour of the tag.
+
+##### `getTagAddedOn`
+
+The `getTagAddedOn()` method gets the date a tag was added from the database. It takes the following arguments:
+
+- `tagId`: The ID of the tag.
+
+The method returns the date the tag was added.
+
+##### `getComment`
+
+The `getComment()` method gets a comment from the database. It takes the following arguments:
+
+- `commentId`: The ID of the comment.
+
+The method returns a `Comment` object.
+
+##### `getCommentPostId`
+
+The `getCommentPostId()` method gets the ID of the post a comment is on from the database. It takes the following
+
+- `commentId`: The ID of the comment.
+
+The method returns the ID of the post the comment is on.
+
+##### `getCommentUserId`
+
+The `getCommentUserId()` method gets the ID of the user who made a comment from the database. It takes the following
+
+- `commentId`: The ID of the comment.
+
+The method returns the ID of the user who made the comment.
+
+##### `getCommentContent`
+
+The `getCommentContent()` method gets the content of a comment from the database. It takes the following arguments:
+
+- `commentId`: The ID of the comment.
+
+The method returns the content of the comment.
+
+##### `getCommentAddedOn`
+
+The `getCommentAddedOn()` method gets the date a comment was made from the database. It takes the following arguments:
+
+- `commentId`: The ID of the comment.
+
+The method returns the date the comment was made.
+
+##### `getCommentEditedOn`
+
+The `getCommentEditedOn()` method gets the date a comment was last edited from the database. It takes the following
+
+- `commentId`: The ID of the comment.
+
+The method returns the date the comment was last edited.
+
+##### `getPostTags`
+
+The `getPostTags()` method gets the tags of a post from the database. It takes the following arguments:
+
+- `postId`: The ID of the post.
+
+The method returns the list of `tagId`s associated with the post.
 
 ### Custom Datatypes
 
@@ -299,5 +669,3 @@ The `Comment` datatype represents a row in the `Comments` table. It contains the
 - `content`: The content of the comment.
 - `addedOn`: The date the comment was made.
 - `editedOn`: The date the comment was last edited.
-- `deletedOn`: The date the comment was deleted.
-
