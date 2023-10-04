@@ -14,7 +14,7 @@ class Comment:
     # Type hinting
     ID: int
     PostId: int
-    CreatorId: int
+    UserId: int
     Content: str
     AddedOn: datetime
     EditedOn: datetime | None
@@ -29,7 +29,7 @@ class Comment:
 
         self.ID = comment[0]
         self.PostId = comment[1]
-        self.CreatorId = comment[2]
+        self.UserId = comment[2]
         self.Content = comment[3]
         self.AddedOn = comment[4]
         self.EditedOn = comment[5]

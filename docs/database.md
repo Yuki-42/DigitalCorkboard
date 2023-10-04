@@ -35,14 +35,14 @@ The `Users` table contains all the information about the users of the system.
 
 The `Posts` table contains all the information about the posts of the system.
 
-| Column name | Type       | Nullable | Additional Data | Description                                       |
-|-------------|------------|----------|-----------------|---------------------------------------------------|
-| `Id`        | `Int`      | No       | Autoincrement   | The unique ID of the post.                        |
-| `CreatorId` | `Int`      | No       |                 | The ID of the creator.                            |
-| `Title`     | `Text`     | No       |                 | The title of the post.                            |
-| `Content`   | `Text`     | No       |                 | The content of the post.                          |
-| `AddedOn`   | `DateTime` | No       |                 | The date the post was made.                       |
-| `ExpiresOn` | `DateTime` | Yes      |                 | The date the post expires.                        |
+| Column name | Type       | Nullable | Additional Data | Description                 |
+|-------------|------------|----------|-----------------|-----------------------------|
+| `Id`        | `Int`      | No       | Autoincrement   | The unique ID of the post.  |
+| `UserId`    | `Int`      | No       |                 | The ID of the creator.      |
+| `Title`     | `Text`     | No       |                 | The title of the post.      |
+| `Content`   | `Text`     | No       |                 | The content of the post.    |
+| `AddedOn`   | `DateTime` | No       |                 | The date the post was made. |
+| `ExpiresOn` | `DateTime` | Yes      |                 | The date the post expires.  |
 
 #### Tags
 
@@ -121,12 +121,12 @@ CREATE TABLE IF NOT EXISTS Users (
 
 CREATE TABLE IF NOT EXISTS Posts (
     Id INTEGER PRIMARY KEY AUTOINCREMENT,
-    CreatorId INTEGER NOT NULL,
+    UserId INTEGER NOT NULL,
     Title TEXT NOT NULL,
     Content TEXT NOT NULL,
     AddedOn DATETIME NOT NULL,
     ExpiresOn DATETIME,
-    FOREIGN KEY (CreatorId) REFERENCES Users(Id) ON DELETE CASCADE
+    FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS Tags (
@@ -377,6 +377,14 @@ The `checkUserExists()` method checks if a user exists in the database. It takes
 
 The method returns a boolean value.
 
+##### `checkUserEmailExists`
+
+The `checkUserEmailExists()` method checks if a user exists in the database. It takes the following arguments:
+
+- `email`: The email of the user.
+
+The method returns a boolean value.
+
 ##### `checkPostExists`
 
 The `checkPostExists()` method checks if a post exists in the database. It takes the following arguments:
@@ -478,9 +486,9 @@ The `getPost()` method gets a post from the database. It takes the following arg
 
 The method returns a `Post` object.
 
-##### `getPostCreatorId`
+##### `getPostUserId`
 
-The `getPostCreatorId()` method gets the ID of the creator of a post from the database. It takes the following arguments:
+The `getPostUserId()` method gets the ID of the creator of a post from the database. It takes the following arguments:
 
 - `postId`: The ID of the post.
 
