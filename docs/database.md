@@ -302,13 +302,6 @@ The `removeComment()` method removes a comment from the database. It takes the f
 
 The method returns nothing.
 
-#### Misnomer Remove Methods
-
-This section details all methods that remove data from the database, without removing a whole row. They are called
-misnomer remove methods because they do not actually remove a row from the database, but rather remove data from an
-existing row. It would be unwise to rename them, however, as their naming makes sense in the context of the rest of the
-code.
-
 ##### `removePostTag`
 
 The `removePostTag()` method removes a tag from a post. It takes the following arguments:
