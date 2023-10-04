@@ -321,6 +321,11 @@ class Database:
         Add Methods
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     """
+    """
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            CRYPTOGRAPHIC METHODS: WARNING: DO NOT MODIFY THESE METHODS UNLESS FIXING SECURITY VULNERABILITIES
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    """
 
     def addUser(self, firstName: str, lastName: str, email: str, password: str) -> int:
         """
@@ -340,6 +345,10 @@ class Database:
         # Hash the password
         hashedPassword: str = hash.pbkdf2_sha512.hash(password)
 
+        # Clear the plaintext password from memory
+        password = None
+        del password
+
         # Add the user to the database
         cursor: Cursor = self.connection.cursor()
         cursor.execute("INSERT INTO Users (FirstName, LastName, Email, Password, AddedOn) VALUES (?, ?, ?, ?, ?);",
@@ -352,6 +361,44 @@ class Database:
         cursor.close()
 
         return userId
+
+    def attemptLogin(self, email: str, plaintextPassword: str) -> bool:
+        """
+        Attempts to login a user.
+
+        Args:
+            email (str): The email of the user to login.
+            plaintextPassword (str): The plaintext password of the user to login.
+
+        Returns:
+            True if the login was successful, False otherwise.
+        """
+        self.logger.info(f"Attempting to login user '{email}'.")
+
+        # Check if the user exists
+        if not self.checkUserEmailExists(email):
+            return False
+
+        # Get the password from the database
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT Password FROM Users WHERE Email = ?;", [email])
+        correctPassword: str = cursor.fetchone()[0]
+        cursor.close()
+
+        # Check if the password is correct
+        correct: bool = hash.pbkdf2_sha512.verify(plaintextPassword, correctPassword)
+
+        # Clear the plaintext password from memory
+        plaintextPassword = None
+        del plaintextPassword
+
+        return correct
+
+    """
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        END CRYPTOGRAPHIC METHODS
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    """
 
     def addPost(self, creatorId: int, title: str, content: str, expiresOn: datetime) -> int:
         """
@@ -916,4 +963,466 @@ class Database:
 
         return password[0] if password is not None else None
 
+    def getUserAdmin(self, userId: int) -> bool:
+        """
+        Gets a user's admin status from the database.
 
+        Args:
+            userId: The ID of the user to get the admin status of.
+
+        Returns:
+            The user's admin status.
+        """
+
+        self.logger.debug(f"Getting user admin status from '{userId}'")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT Admin FROM Users WHERE Id = ?", [userId])
+
+        admin: tuple[bool] = cursor.fetchone()
+        cursor.close()
+
+        return admin[0] if admin is not None else None
+
+    def getUserBio(self, userId: int) -> str:
+        """
+        Gets a user's bio from the database.
+
+        Args:
+            userId: The ID of the user to get the bio of.
+
+        Returns:
+            The user's bio.
+        """
+
+        self.logger.debug(f"Getting user bio from '{userId}'")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT Bio FROM Users WHERE Id = ?", [userId])
+
+        bio: tuple[str] = cursor.fetchone()
+        cursor.close()
+
+        return bio[0] if bio is not None else None
+
+    def getUserAddedOn(self, userId: int) -> datetime:
+        """
+        Gets a user's addedOn date from the database.
+
+        Args:
+            userId: The ID of the user to get the addedOn date of.
+
+        Returns:
+            The user's addedOn date.
+        """
+
+        self.logger.debug(f"Getting user addedOn date from '{userId}'")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT AddedOn FROM Users WHERE Id = ?", [userId])
+
+        addedOn: tuple[datetime] = cursor.fetchone()
+        cursor.close()
+
+        return addedOn[0] if addedOn is not None else None
+
+    def getUserPosts(self, userId: int) -> list[int]:
+        """
+        Gets a user's posts from the database.
+
+        Args:
+            userId: The ID of the user to get the posts of.
+
+        Returns:
+            The user's posts.
+        """
+
+        self.logger.debug(f"Getting user posts from '{userId}'")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT Id FROM Posts WHERE UserId = ?", [userId])
+
+        rawPosts: list[tuple[int]] = cursor.fetchall()
+        cursor.close()
+
+        return [post[0] for post in rawPosts] if rawPosts is not None else None
+
+    def getPost(self, postId: int) -> Post | None:
+        """
+        Gets a post object from the database.
+
+        Args:
+            postId: The ID of the post to retrieve.
+
+        Returns:
+            The corresponding post, if found, else None.
+        """
+
+        self.logger.debug(f"Retrieving post '{postId}' from the database.")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT * FROM Posts WHERE Id = ?", [postId])
+        post: Post = Post(*cursor.fetchone())
+        cursor.close()
+
+        return post
+
+    def getPostUserId(self, postId: int) -> int | None:
+        """
+        Gets a post's userId from the database.
+
+        Args:
+            postId: The ID of the post to retrieve.
+
+        Returns:
+            The corresponding post's userId, if found, else None.
+        """
+
+        self.logger.debug(f"Retrieving post '{postId}' from the database.")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT UserId FROM Posts WHERE Id = ?", [postId])
+        userId: int = cursor.fetchone()[0]
+        cursor.close()
+
+        return userId
+
+    def getPostTitle(self, postId: int) -> str | None:
+        """
+        Gets a post's title from the database.
+
+        Args:
+            postId: The ID of the post to retrieve.
+
+        Returns:
+            The corresponding post's title, if found, else None.
+        """
+
+        self.logger.debug(f"Retrieving post '{postId}' from the database.")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT Title FROM Posts WHERE Id = ?", [postId])
+        title: str = cursor.fetchone()[0]
+        cursor.close()
+
+        return title
+
+    def getPostContent(self, postId: int) -> str | None:
+        """
+        Gets a post's content from the database.
+
+        Args:
+            postId: The ID of the post to retrieve.
+
+        Returns:
+            The corresponding post's content, if found, else None.
+        """
+
+        self.logger.debug(f"Retrieving post '{postId}' from the database.")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT Content FROM Posts WHERE Id = ?", [postId])
+        content: str = cursor.fetchone()[0]
+        cursor.close()
+
+        return content
+
+    def getPostAddedOn(self, postId: int) -> datetime | None:
+        """
+        Gets a post's addedOn date from the database.
+
+        Args:
+            postId: The ID of the post to retrieve.
+
+        Returns:
+            The corresponding post's addedOn date, if found, else None.
+        """
+
+        self.logger.debug(f"Retrieving post '{postId}' from the database.")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT AddedOn FROM Posts WHERE Id = ?", [postId])
+        addedOn: datetime = cursor.fetchone()[0]
+        cursor.close()
+
+        return addedOn
+
+    def getPostExpiresOn(self, postId: int) -> datetime | None:
+        """
+        Gets a post's expiresOn date from the database.
+
+        Args:
+            postId: The ID of the post to retrieve.
+
+        Returns:
+            The corresponding post's expiresOn date, if found, else None.
+        """
+
+        self.logger.debug(f"Retrieving post '{postId}' from the database.")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT ExpiresOn FROM Posts WHERE Id = ?", [postId])
+        expiresOn: datetime = cursor.fetchone()[0]
+        cursor.close()
+
+        return expiresOn
+
+    def getPostTags(self, postId: int) -> list[int] | None:
+        """
+        Gets a post's tags from the database.
+
+        Args:
+            postId: The ID of the post to retrieve.
+
+        Returns:
+            The corresponding post's tags, if found, else None.
+        """
+
+        self.logger.debug(f"Retrieving post '{postId}' from the database.")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT TagId FROM PostTags WHERE PostId = ?", [postId])
+        tagIds: list[int] = cursor.fetchall()
+        cursor.close()
+
+        return tagIds
+
+    def getPostComments(self, postId: int) -> list[int] | None:
+        """
+        Gets a post's comments from the database.
+
+        Args:
+            postId: The ID of the post to retrieve.
+
+        Returns:
+            The corresponding post's comments, if found, else None.
+        """
+
+        self.logger.debug(f"Retrieving post '{postId}' from the database.")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT Id FROM Comments WHERE PostId = ?", [postId])
+        commentIds: list[int] = cursor.fetchall()
+        cursor.close()
+
+        return commentIds
+
+    def getTag(self, tagId: int) -> Tag | None:
+        """
+        Gets a tag object from the database.
+
+        Args:
+            tagId: The ID of the tag to retrieve.
+
+        Returns:
+            The corresponding tag, if found, else None.
+        """
+
+        self.logger.debug(f"Retrieving tag '{tagId}' from the database.")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT * FROM Tags WHERE Id = ?", [tagId])
+        tag: Tag = Tag(*cursor.fetchone())
+        cursor.close()
+
+        return tag
+
+    def getTagName(self, tagId: int) -> str | None:
+        """
+        Gets a tag's name from the database.
+
+        Args:
+            tagId: The ID of the tag to retrieve.
+
+        Returns:
+            The corresponding tag's name, if found, else None.
+        """
+
+        self.logger.debug(f"Retrieving tag '{tagId}' from the database.")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT Name FROM Tags WHERE Id = ?", [tagId])
+        name: str = cursor.fetchone()[0]
+        cursor.close()
+
+        return name
+
+    def getTagDescription(self, tagId: int) -> str | None:
+        """
+        Gets a tag's description from the database.
+
+        Args:
+            tagId: The ID of the tag to retrieve.
+
+        Returns:
+            The corresponding tag's description, if found, else None.
+        """
+
+        self.logger.debug(f"Retrieving tag '{tagId}' from the database.")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT Description FROM Tags WHERE Id = ?", [tagId])
+        description: str = cursor.fetchone()[0]
+        cursor.close()
+
+        return description
+
+    def getTagColour(self, tagId: int) -> str | None:
+        """
+        Gets a tag's colour from the database.
+
+        Args:
+            tagId: The ID of the tag to retrieve.
+
+        Returns:
+            The corresponding tag's colour, if found, else None.
+        """
+
+        self.logger.debug(f"Retrieving tag '{tagId}' from the database.")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT Colour FROM Tags WHERE Id = ?", [tagId])
+        colour: str = cursor.fetchone()[0]
+        cursor.close()
+
+        return colour
+
+    def getTagAddedOn(self, tagId: int) -> datetime | None:
+        """
+        Gets a tag's addedOn date from the database.
+
+        Args:
+            tagId: The ID of the tag to retrieve.
+
+        Returns:
+            The corresponding tag's addedOn date, if found, else None.
+        """
+
+        self.logger.debug(f"Retrieving tag '{tagId}' from the database.")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT AddedOn FROM Tags WHERE Id = ?", [tagId])
+        addedOn: datetime = cursor.fetchone()[0]
+        cursor.close()
+
+        return addedOn
+
+    def getComment(self, commentId: int) -> Comment | None:
+        """
+        Gets a comment object from the database.
+
+        Args:
+            commentId: The ID of the comment to retrieve.
+
+        Returns:
+            The corresponding comment, if found, else None.
+        """
+
+        self.logger.debug(f"Retrieving comment '{commentId}' from the database.")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT * FROM Comments WHERE Id = ?", [commentId])
+        comment: Comment = Comment(*cursor.fetchone())
+        cursor.close()
+
+        return comment
+
+    def getCommentPostId(self, commentId: int) -> int | None:
+        """
+        Gets a comment's postId from the database.
+
+        Args:
+            commentId: The ID of the comment to retrieve.
+
+        Returns:
+            The corresponding comment's postId, if found, else None.
+        """
+
+        self.logger.debug(f"Retrieving comment '{commentId}' from the database.")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT PostId FROM Comments WHERE Id = ?", [commentId])
+        postId: int = cursor.fetchone()[0]
+        cursor.close()
+
+        return postId
+
+    def getCommentUserId(self, commentId: int) -> int | None:
+        """
+        Gets a comment's userId from the database.
+
+        Args:
+            commentId: The ID of the comment to retrieve.
+
+        Returns:
+            The corresponding comment's userId, if found, else None.
+        """
+
+        self.logger.debug(f"Retrieving comment '{commentId}' from the database.")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT UserId FROM Comments WHERE Id = ?", [commentId])
+        userId: int = cursor.fetchone()[0]
+        cursor.close()
+
+        return userId
+
+    def getCommentContent(self, commentId: int) -> str | None:
+        """
+        Gets a comment's content from the database.
+
+        Args:
+            commentId: The ID of the comment to retrieve.
+
+        Returns:
+            The corresponding comment's content, if found, else None.
+        """
+
+        self.logger.debug(f"Retrieving comment '{commentId}' from the database.")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT Content FROM Comments WHERE Id = ?", [commentId])
+        content: str = cursor.fetchone()[0]
+        cursor.close()
+
+        return content
+
+    def getCommentAddedOn(self, commentId: int) -> datetime | None:
+        """
+        Gets a comment's addedOn date from the database.
+
+        Args:
+            commentId: The ID of the comment to retrieve.
+
+        Returns:
+            The corresponding comment's addedOn date, if found, else None.
+        """
+
+        self.logger.debug(f"Retrieving comment '{commentId}' from the database.")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT AddedOn FROM Comments WHERE Id = ?", [commentId])
+        addedOn: datetime = cursor.fetchone()[0]
+        cursor.close()
+
+        return addedOn
+
+    def getCommentEditedOn(self, commentId: int) -> datetime | None:
+        """
+        Gets a comment's editedOn date from the database.
+
+        Args:
+            commentId: The ID of the comment to retrieve.
+
+        Returns:
+            The corresponding comment's editedOn date, if found, else None.
+        """
+
+        self.logger.debug(f"Retrieving comment '{commentId}' from the database.")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT EditedOn FROM Comments WHERE Id = ?", [commentId])
+        editedOn: datetime = cursor.fetchone()[0]
+        cursor.close()
+
+        return editedOn

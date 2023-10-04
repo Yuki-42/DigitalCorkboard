@@ -477,6 +477,13 @@ The `getUserAddedOn()` method gets the date a user joined from the database. It 
 
 The method returns the date the user joined.
 
+##### `getUserPosts`
+
+The `getUserPosts()` method gets the posts of a user from the database. It takes the following arguments:
+
+- `userId`: The ID of the user.
+
+The method returns the list of `postId`s associated with the user.
 
 ##### `getPost`
 
@@ -525,6 +532,22 @@ The `getPostExpiresOn()` method gets the date a post expires from the database. 
 - `postId`: The ID of the post.
 
 The method returns the date the post expires.
+
+##### `getPostTags`
+
+The `getPostTags()` method gets the tags of a post from the database. It takes the following arguments:
+
+- `postId`: The ID of the post.
+
+The method returns the list of `tagId`s associated with the post.
+
+##### `getPostComments`
+
+The `getPostComments()` method gets the comments of a post from the database. It takes the following arguments:
+
+- `postId`: The ID of the post.
+
+The method returns the list of `commentId`s associated with the post.
 
 ##### `getTag`
 
@@ -613,22 +636,6 @@ The `getCommentEditedOn()` method gets the date a comment was last edited from t
 - `commentId`: The ID of the comment.
 
 The method returns the date the comment was last edited.
-
-##### `getPostTags`
-
-The `getPostTags()` method gets the tags of a post from the database. It takes the following arguments:
-
-- `postId`: The ID of the post.
-
-The method returns the list of `tagId`s associated with the post.
-
-##### `getUserPosts`
-
-The `getUserPosts()` method gets the posts of a user from the database. It takes the following arguments:
-
-- `userId`: The ID of the user.
-
-The method returns the list of `postId`s associated with the user.
 
 #### Cryptographic methods
 
