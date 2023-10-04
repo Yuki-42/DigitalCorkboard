@@ -622,6 +622,14 @@ The `getPostTags()` method gets the tags of a post from the database. It takes t
 
 The method returns the list of `tagId`s associated with the post.
 
+##### `getUserPosts`
+
+The `getUserPosts()` method gets the posts of a user from the database. It takes the following arguments:
+
+- `userId`: The ID of the user.
+
+The method returns the list of `postId`s associated with the user.
+
 #### Cryptographic methods
 
 This section details all methods that use cryptography. They are mainly used for password handling.

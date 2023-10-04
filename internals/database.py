@@ -806,4 +806,114 @@ class Database:
 
         return comment is not None
 
+    """
+    -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            Get Methods
+    -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    """
+
+    def getUser(self, userId: int) -> User | None:
+        """
+        Gets a user object from the database.
+
+        Args:
+            userId: The ID of the user to retrieve.
+
+        Returns:
+            The corresponding user, if found, else None.
+        """
+
+        self.logger.debug(f"Retrieving user '{userId}' from the database.")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT * FROM Users WHERE Id = ?", [userId])
+        user: User = User(*cursor.fetchone())
+        cursor.close()
+
+        return user
+
+    def getUserId(self, email: str) -> int | None:
+        """
+        Gets a userId from the database corresponding to a specific email address.
+
+        Args:
+            email: The email to get the associated user id of.
+
+        Returns:
+            The user id if found, else None
+        """
+
+        self.logger.debug(f"Retrieving user id from '{email}'")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT Id FROM Users WHERE Email = ?", [email])
+
+        Id: tuple[int] = cursor.fetchone()
+        cursor.close()
+
+        return Id[0] if Id is not None else None
+
+    def getUserName(self, userId: int) -> tuple[str, str]:
+        """
+        Gets a user's first and last name from the database.
+
+        Args:
+            userId: The ID of the user to get the names of.
+
+        Returns:
+            The user's first and last name
+        """
+
+        self.logger.debug(f"Retrieving user names from '{userId}'")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT FirstName, LastName FROM Users WHERE Id = ?", [userId])
+
+        name: tuple[str, str] = cursor.fetchone()
+        cursor.close()
+
+        return name
+
+    def getUserEmail(self, userId: int) -> str:
+        """
+        Gets a user's email from the database.
+
+        Args:
+            userId: The ID of the user to get the email of.
+
+        Returns:
+            The user's email address.
+        """
+
+        self.logger.debug(f"Getting user email from '{userId}'")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT Email FROM Users WHERE Id = ?", [userId])
+
+        email: tuple[str] = cursor.fetchone()
+        cursor.close()
+
+        return email[0] if email is not None else None
+
+    def getUserPassword(self, userId: int) -> str:
+        """
+        Gets a user's password from the database.
+
+        Args:
+            userId: The ID of the use to get the password of.
+
+        Returns:
+            The user's password
+        """
+
+        self.logger.debug(f"Getting user password from '{userId}'")
+
+        cursor: Cursor = self.connection.cursor()
+        cursor.execute("SELECT Password FROM Users WHERE Id =?", [userId])
+
+        password: tuple[str] = cursor.fetchone()
+        cursor.close()
+
+        return password[0] if password is not None else None
+
 
