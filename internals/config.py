@@ -9,6 +9,7 @@ from pathlib import Path
 
 # Internal imports
 from .logging import createLogger
+from .configDataModels import Server, Logging
 
 
 class Config:
@@ -22,10 +23,10 @@ class Config:
 
     def __init__(self, path: str | Path):
         self.path = path
-        self.logger = createLogger("Config", self.LoggingLevel)
+        self.logger = createLogger("Config", self.Logging.Level)
 
     @property
-    def Logging(self) -> dict:
+    def Logging(self) -> Logging:
         """
         Gets the logging configuration from the config file.
 
@@ -33,21 +34,10 @@ class Config:
             The logging configuration.
         """
 
-        return self._getValue("Logging")
+        return Logging(self._getValue("Logging"))
 
     @property
-    def LoggingLevel(self) -> str:
-        """
-        Gets the logging level from the config file.
-
-        Returns:
-            The logging level.
-        """
-
-        return self._getValue("Logging")["Level"]
-
-    @property
-    def Server(self) -> dict:
+    def Server(self) -> Server:
         """
         Gets the server configuration from the config file.
 
@@ -55,29 +45,7 @@ class Config:
             The server configuration.
         """
 
-        return self._getValue("Server")
-
-    @property
-    def ServerHost(self) -> str:
-        """
-        Gets the server host from the config file.
-
-        Returns:
-            The server host.
-        """
-
-        return self._getValue("Server")["Host"]
-
-    @property
-    def ServerPort(self) -> int:
-        """
-        Gets the server port from the config file.
-
-        Returns:
-            The server port.
-        """
-
-        return self._getValue("Server")["Port"]
+        return Server(self._getValue("Server"))
 
     def _getValue(self, key: str) -> any:
         """
