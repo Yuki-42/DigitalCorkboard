@@ -418,6 +418,14 @@ The method returns a boolean value.
 
 This section details all methods that get data from the database.
 
+##### `getUserId`
+
+The `getUserId()` method gets the ID of a user from the database. It takes the following arguments:
+
+- `email`: The email of the user.
+
+The method returns the ID of the user.
+
 ##### `getUser`
 
 The `getUser()` method gets a user from the database. It takes the following arguments:
@@ -618,6 +626,19 @@ The `getPostTags()` method gets the tags of a post from the database. It takes t
 - `postId`: The ID of the post.
 
 The method returns the list of `tagId`s associated with the post.
+
+#### Cryptographic methods
+
+This section details all methods that use cryptography. They are mainly used for password handling.
+
+##### `attemptLogin`
+
+The `attemptLogin()` method attempts to log a user in. It takes the following arguments:
+
+- `email`: The email of the user.
+- `password`: The password of the user.
+
+The method returns a boolean value indicating whether the login was successful.
 
 ### Custom Datatypes
 
