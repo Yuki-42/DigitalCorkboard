@@ -15,7 +15,7 @@ class Tag:
     ID: int
     Name: str
     Description: str | None
-    Color: str
+    Colour: str
     AddedOn: datetime
 
     def __init__(self, tag: tuple[int, str, str | None, str, datetime]):
@@ -29,5 +29,5 @@ class Tag:
         self.ID = tag[0]
         self.Name = tag[1]
         self.Description = tag[2]
-        self.Color = tag[3]
+        self.Colour = tag[3]
         self.AddedOn = tag[4]
