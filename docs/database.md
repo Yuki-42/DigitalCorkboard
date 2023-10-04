@@ -311,13 +311,13 @@ The `removePostTag()` method removes a tag from a post. It takes the following a
 
 The method returns nothing.
 
-#### Modify methods
+#### Update methods
 
-This section details all methods that modify specific fields in the database.
+This section details all methods that update specific fields in the database.
 
-##### `modifyUser`
+##### `updateUser`
 
-The `modifyUser()` method modifies a user in the database. The only argument required is the ID of the user. The method 
+The `updateUser()` method modifies a user in the database. The only argument required is the ID of the user. The method 
 takes the following keyword arguments:
 
 - `firstName`: The first name of the user.
@@ -329,9 +329,9 @@ takes the following keyword arguments:
 
 The method returns nothing.
 
-##### `modifyPost`
+##### `updatePost`
 
-The `modifyPost()` method modifies a post in the database. The only argument required is the ID of the post. The method
+The `updatePost()` method modifies a post in the database. The only argument required is the ID of the post. The method
 takes the following keyword arguments:
 
 - `creatorId`: The ID of the creator of the post.
@@ -342,9 +342,9 @@ takes the following keyword arguments:
 
 The method returns nothing.
 
-##### `modifyTag`
+##### `updateTag`
 
-The `modifyTag()` method modifies a tag in the database. The only argument required is the ID of the tag. The method
+The `updateTag()` method modifies a tag in the database. The only argument required is the ID of the tag. The method
 takes the following keyword arguments:
 
 - `name`: The name of the tag.
@@ -353,9 +353,9 @@ takes the following keyword arguments:
 
 The method returns nothing.
 
-##### `modifyComment`
+##### `updateComment`
 
-The `modifyComment()` method modifies a comment in the database. The only argument required is the ID of the comment.
+The `updateComment()` method modifies a comment in the database. The only argument required is the ID of the comment.
 The method takes the following keyword arguments:
 
 - `postId`: The ID of the post the comment is on.
