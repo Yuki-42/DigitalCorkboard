@@ -254,12 +254,6 @@ The `addComment()` method adds a comment to the database. It takes the following
 
 The method returns the ID of the comment that was added.
 
-#### Misnomer Add Methods
-
-This section details all methods that add data to the database, without adding a whole row. They are called misnomer add
-methods because they do not actually add a row to the database, but rather add data to an existing row. It would be 
-unwise to rename them, however, as their naming makes sense in the context of the rest of the code.
-
 ##### `addPostTag`
 
 The `addPostTag()` method adds a tag to a post. It takes the following arguments:
