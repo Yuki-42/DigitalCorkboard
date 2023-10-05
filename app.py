@@ -3,21 +3,42 @@ The main entry point for the application.
 """
 # Standard library imports
 from pathlib import Path
+from secrets import token_urlsafe
 
 # External imports
-from flask import Flask, render_template as renderTemplate, request
+from flask import Flask, render_template as renderTemplate, request, session, redirect, url_for, Response
+from flask_session import Session
+from redis import from_url
 
 # Internal imports
 from internals import Database, Config, createLogger
 
 config: Config = Config(Path("ServerData/config.json"))
-database: Database = Database(Path("ServerData/database.db"))
+database: Database = Database(config, Path("ServerData/database.db"))
 
+# Set up the flask app
 app = Flask(__name__)
+
+# Set the secret key
+app.secret_key = config.Server.SecretKey
+
+# Configure the app
+app.config["TEMPLATES_AUTO_RELOAD"] = True
+app.config["SESSION_TYPE"] = "redis"
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_USE_SIGNER"] = True
+
+# Set up the redis session
+app.config["REDIS_HOST"] = "localhost"
+app.config["REDIS_PORT"] = 6379
+# app.config["REDIS_PASSWORD"] = config.Server.RedisPassword
+
+# Set up the session
+serverSession = Session(app)
 
 
 @app.route("/")
-def helloWorld() -> str:
+def index() -> str:
     """
     Renders the index.html template.
 
@@ -28,32 +49,87 @@ def helloWorld() -> str:
 
 
 @app.route("/login", methods=["GET", "POST"])
-def login() -> str:
+def login() -> str | Response:
     """
     Depending on the request method, renders the login.html template or logs the user in.
 
     Returns:
         The rendered login.html template.
     """
+    # Log the user in
     if request.method == "POST":
-        # Log the user in
-        pass
+        # Get the form data
+        email: str = request.form["email"]
+        password: str = request.form["password"]
+
+        # Check if the user exists
+        if not database.checkUserEmailExists(email):
+            # Render the login page with an error
+            return renderTemplate("login.html", error="User does not exist.")
+
+        # Check if the password is correct
+        if not database.attemptLogin(email, password):
+            # Remove the password from memory
+            password = None  # type: ignore  # Ignore the type error for deleting
+            del password
+
+            # Render the login page with an error
+            return renderTemplate("login.html", error="Incorrect password.")
+
+        # Remove the password from memory
+        password = None  # type: ignore  # Ignore the type error for deleting
+        del password
+
+        # Set the session variables
+        # session["email"] = email
+        # session["userId"] = database.getUserId(email)
+
+        # Redirect the user to the index page
+        return redirect(url_for("index"))
 
     # Render the login page
     return renderTemplate("login.html")
 
 
 @app.route("/register", methods=["GET", "POST"])
-def register() -> str:
+def register() -> str | Response:
     """
     Depending on the request method, renders the register.html template or registers the user.
 
     Returns:
         The rendered register.html template.
     """
+    # Register the user
     if request.method == "POST":
-        # Register the user
-        pass
+        # Get the form data
+        firstName: str = request.form["firstName"]
+        lastName: str = request.form["lastName"]
+        email: str = request.form["email"]
+        password: str = request.form["password"]
+        confirmPassword: str = request.form["confirmPassword"]
+
+        # Check if the passwords match
+        if password != confirmPassword:
+            # Render the register page with an error
+            return renderTemplate("register.html", error="Passwords do not match.")
+
+        # Remove the confirmation password from memory
+        del confirmPassword
+
+        # Check if the email is already in use
+        if database.checkUserEmailExists(email):
+            # Render the register page with an error
+            return renderTemplate("register.html", error="Email already in use.")
+
+        # Create the user
+        database.addUser(firstName, lastName, email, password)
+
+        # Remove the password from memory
+        password = None  # type: ignore  # Ignore the type error for deleting
+        del password
+
+        # Redirect the user to the login page
+        return redirect(url_for("login"))
 
     # Render the register page
     return renderTemplate("register.html")
