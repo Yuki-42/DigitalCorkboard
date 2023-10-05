@@ -12,6 +12,7 @@ class Server:
     Host: str
     Port: int
     SecretKey: str
+    RedisPassword: str
 
     def __init__(self, server: dict[str, str | int]):
         """
@@ -24,6 +25,7 @@ class Server:
         self.Host = server["Host"]
         self.Port = server["Port"]
         self.SecretKey = server["SecretKey"]
+        self.RedisPassword = server["RedisPassword"]
 
 
 class Logging:

@@ -5,6 +5,7 @@
   "Server": {
     "Host": "0.0.0.0",
     "Port": 80,
-    "SecretKey": "SECRET_KEY_HERE"
+    "SecretKey": "SECRET_KEY_HERE",
+    "RedisPassword": "REDIS_PASSWORD_HERE"
   }
 }
