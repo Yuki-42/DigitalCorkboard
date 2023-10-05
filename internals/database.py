@@ -52,8 +52,8 @@ class Database:
             None
         """
         self.config: Config = config
-        self.logger: LoggerAdapter = createLogger("Database", self.config.LoggingLevel)
-        self.connection: Connection = connect(databasePath)
+        self.logger: LoggerAdapter = createLogger("Database", self.config.Logging.Level)
+        self.connection: Connection = connect(databasePath, check_same_thread=False)
 
         # Check that the tables exist
         self._checkTablesExist()
