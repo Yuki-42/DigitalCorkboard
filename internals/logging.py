@@ -5,13 +5,16 @@ Contains the various logging functions for the site and its components.
 # Standard library imports
 from asyncio import Queue
 from datetime import datetime
-from logging import CRITICAL, DEBUG, ERROR, FileHandler, Formatter, Handler, INFO, Logger, LoggerAdapter, StreamHandler, WARNING, getLogger
-from logging import LogRecord
+from logging import CRITICAL, DEBUG, ERROR, FileHandler, Formatter, Handler, INFO, Logger, LoggerAdapter, StreamHandler, \
+    WARNING, getLogger, LogRecord
 from os import getcwd, mkdir, path
 from pathlib import Path
 from sqlite3 import Connection, Cursor, OperationalError, ProgrammingError, connect
 from sys import stdout
 from typing import Literal
+
+# External Imports
+from flask import has_request_context, request
 
 
 def getEscapeCode(
@@ -117,6 +120,60 @@ class ColourCodedFormatter(Formatter):
             record.levelname = f"{self.colourCoding[record.levelname]}{record.levelname}\033[0m"
         except KeyError:  # Handles the case where the level name is not in the colour coding dictionary
             pass
+        return super().format(record)
+
+
+class RequestFormatter(Formatter):
+    """
+    A formatter that formats the log messages for the request logger.
+    """
+    # Type hints
+    colourCoding: dict[str, str]
+
+    def __init__(
+            self,
+            fmt: str | None = None,
+            datefmt: str | None = None,
+            style: Literal["%", "{", "$"] = "%",
+            colourCoding: dict[str, str] = None
+    ):
+        super().__init__(fmt, datefmt, style)
+
+        if colourCoding is None:
+            colourCoding = {
+                "DEBUG": getEscapeCode("CYAN"),
+                "INFO": getEscapeCode("GREEN"),
+                "WARNING": getEscapeCode("YELLOW"),
+                "ERROR": getEscapeCode("RED"),
+                "CRITICAL": getEscapeCode("RED_H"),
+            }
+        self.colourCoding = colourCoding
+
+    def format(self, record: LogRecord):
+        """
+        Formats the log message.
+
+        Args:
+            record: The log record to format.
+
+        Returns:
+            The formatted log message.
+        """
+        # Set all the request variables
+        if has_request_context():
+            record.url = request.url
+            record.method = request.method
+            record.remoteAddr = request.remote_addr
+        else:
+            record.url = None
+            record.method = None
+            record.remoteAddr = None
+
+        try:
+            record.levelname = f"{self.colourCoding[record.levelname]}{record.levelname}\033[0m"
+        except KeyError:  # Handles the case where the level name is not in the colour coding dictionary
+            pass
+
         return super().format(record)
 
 

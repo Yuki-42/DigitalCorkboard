@@ -4,6 +4,9 @@ The main entry point for the application.
 # Standard library imports
 from pathlib import Path
 from secrets import token_urlsafe
+from logging import StreamHandler, FileHandler, getLogger
+from sys import stdout
+from datetime import datetime
 
 # External imports
 from flask import Flask, render_template as renderTemplate, request, session, redirect, url_for, Response
@@ -11,13 +14,38 @@ from flask_session import Session
 from redis import from_url
 
 # Internal imports
-from internals import Database, Config, createLogger
+from internals import Database, Config, createLogger, RequestFormatter
 
 config: Config = Config(Path("ServerData/config.json"))
 database: Database = Database(config, Path("ServerData/database.db"))
 
 # Set up the flask app
 app = Flask(__name__)
+
+# TODO: Get all of this garbage working
+# # Ensure App Logs directory exists
+# Path("Logs/App").mkdir(parents=True, exist_ok=True)
+#
+# # Create app logger handlers
+# streamHandler: StreamHandler = StreamHandler(stdout)
+# streamHandler.setFormatter(RequestFormatter("[%(asctime)s] [APP] [%(levelname)s] [%(remoteAddr)s] %(message)s"))  # The
+# # APP being the logger name is a workaround, because logging is stupid
+#
+# fileHandler: FileHandler = FileHandler(Path(f"Logs/App/AppLog{datetime.now().strftime('%d.%m.%Y')}.log"))
+#
+# # Clear the app logger handlers
+# app.logger.handlers.clear()
+#
+# # Add the app logger handlers
+# app.logger.addHandler(streamHandler)
+# app.logger.addHandler(fileHandler)
+#
+# # Do the same for the werkzeug logger
+# logger = getLogger("werkzeug")
+# logger.handlers.clear()
+#
+# logger.addHandler(streamHandler)
+# logger.addHandler(fileHandler)
 
 # Set the secret key
 app.secret_key = config.Server.SecretKey
@@ -31,7 +59,7 @@ app.config["SESSION_USE_SIGNER"] = True
 # Set up the redis session
 app.config["REDIS_HOST"] = "localhost"
 app.config["REDIS_PORT"] = 6379
-# app.config["REDIS_PASSWORD"] = config.Server.RedisPassword
+app.config["REDIS_PASSWORD"] = config.Server.RedisPassword
 
 # Set up the session
 serverSession = Session(app)
@@ -45,6 +73,7 @@ def index() -> str:
     Returns:
         The rendered index.html template.
     """
+
     return renderTemplate("index.html")
 
 
@@ -85,6 +114,7 @@ def login() -> str | Response:
         # session["userId"] = database.getUserId(email)
 
         # Redirect the user to the index page
+        print(session.values())
         return redirect(url_for("index"))
 
     # Render the login page
